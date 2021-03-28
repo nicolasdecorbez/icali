@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "icali"
+version = "0.1.0"
+description = "CLI program that creates icals from csv files."
+
+authors = [
+  "Nicolas DECORBEZ <decorbezpro@gmail.com>"
+]
+
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+ics = "^0.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+icali = "src.csv_reader:create_calendar"
