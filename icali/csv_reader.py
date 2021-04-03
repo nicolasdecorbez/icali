@@ -1,66 +1,43 @@
-import csv
-from . import read_input
+""" Read CSV files and create ICS Calendar and Events """
+
 import sys
-from ics import Calendar, Event
-from dataclasses import dataclass
+from csv import DictReader
+from ics import Calendar, Event as CalendarEvent
+from icali import read_input
 
-@dataclass
-class Positions:
-    title: ""
-    date: ""
-    description: ""
 
-def generate_pos(title, date, description):
-    params = Positions(title, date, description)
-    return params
-
-# ---- #
-
-# Determine the position of each field in CSV file
-def get_position(input, toFind):
-    position = 0;
-    for field in input:
-        if field == toFind:
-            return position
-        else:
-            position += 1
-    sys.exit(f"Error : field '{toFind}' doesn't exist. Exiting the program...")
-
-# Add .ics extension to filename if missing
 def verify_filename(filename):
-    type=".ics"
-    if filename.endswith(type):
-        return filename;
-    else :
-        toret=filename+type
-        return toret
+    """ Add .ics extension to filename if missing """
+    extension = ".ics"
+    if not filename.endswith(extension):
+        filename = filename + extension
+    return filename
 
-def export_calendar(c, filename):
+
+def export_calendar(calendar, filename):
+    """ Export the Calendar into .ics file """
     filename = verify_filename(filename)
     try:
-        with open(filename, 'w') as f:
-            f.writelines(c)
+        with open(filename, 'w') as file:
+            file.writelines(calendar)
         print(f"File {filename} created in current directory.")
-    except Exception as e:
-        sys.exit(e)
+    except OSError:
+        print(f"Could not open/read {filename}")
+        sys.exit()
 
 
 def create_calendar():
-    c = Calendar()
+    """ Read .csv file and create Events and Calendar """
+    calendar = Calendar()
+    index = None
     parameters = read_input.get_args()
     with open(parameters.filename, newline='') as csvfile:
-        csv_opener = csv.reader(csvfile, delimiter=',')
+        csv_opener = DictReader(csvfile, delimiter=',')
         for index, row in enumerate(csv_opener):
-            if index == 0:
-                positions = generate_pos(get_position(row, parameters.title), get_position(row, parameters.date), get_position(row, "description"))
-            else:
-                e = Event()
-                e.name = row[positions.title]
-                e.begin = row[positions.date]
-                e.description = row[positions.description]
-                c.events.add(e)
-        try:
-            print(f"Created {index} events.")
-            export_calendar(c, parameters.output)
-        except Exception as e:
-            sys.exit(e)
+            event = CalendarEvent()
+            event.name = row[parameters.title]
+            event.begin = row[parameters.date]
+            event.description = row["description"]
+            calendar.events.add(event)
+        print(f"Created {index + 1} events.")
+        export_calendar(calendar, parameters.output)
