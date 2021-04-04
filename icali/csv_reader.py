@@ -23,21 +23,21 @@ def export_calendar(calendar, filename):
         print(f"File {filename} created in current directory.")
     except OSError:
         print(f"Could not open/read {filename}")
-        sys.exit()
+        sys.exit(1)
 
 
 def create_calendar():
     """ Read .csv file and create Events and Calendar """
     calendar = Calendar()
-    index = None
+    index = 0
     parameters = read_input.get_args()
     with open(parameters.filename, newline='') as csvfile:
         csv_opener = DictReader(csvfile, delimiter=',')
-        for index, row in enumerate(csv_opener):
+        for index, row in enumerate(csv_opener, start=1):
             event = CalendarEvent()
             event.name = row[parameters.title]
             event.begin = row[parameters.date]
             event.description = row["description"]
             calendar.events.add(event)
-        print(f"Created {index + 1} events.")
+        print(f"Created {index} events.")
         export_calendar(calendar, parameters.output)
